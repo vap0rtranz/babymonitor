@@ -15,8 +15,6 @@ copies or substantial portions of the Software.
 */
 
 #include <GSM.h>
-#include "notes.h"
-
 
 // You can costumize the PINs
 #define fistLed 11
@@ -152,19 +150,6 @@ namespace monitoringSystem
                   Serial.println("Error while changing band");
                  }
           }
-          
-          void playTwinkleTwinkleLittleStar(){
-            int melody[] = {NOTE_B4, NOTE_B4, NOTE_FS5, NOTE_FS5, NOTE_GS5, NOTE_GS5, NOTE_FS5, NOTE_NONE, NOTE_E5, NOTE_E5, NOTE_DS5, NOTE_DS5, NOTE_CS5, NOTE_CS5, NOTE_B4, NOTE_NONE, NOTE_FS5, NOTE_FS5, NOTE_E5, NOTE_E5, NOTE_DS5, NOTE_DS5, NOTE_CS5, NOTE_NONE, NOTE_FS5, NOTE_FS5, NOTE_E5, NOTE_E5, NOTE_DS5, NOTE_DS5, NOTE_DS5, NOTE_DS5, NOTE_CS5, NOTE_NONE, NOTE_B4, NOTE_B4, NOTE_FS5, NOTE_FS5, NOTE_GS5, NOTE_GS5, NOTE_FS5, NOTE_NONE, NOTE_E5, NOTE_E5, NOTE_DS5, NOTE_DS5, NOTE_CS5, NOTE_CS5, NOTE_B4, NOTE_NONE};
-            int noteDurations[] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,4,4,4,4,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
-            for (int thisNote = 0; thisNote < sizeof(melody)/sizeof(int); thisNote++) {
-              int noteDuration = 1000/noteDurations[thisNote];
-              tone(8, melody[thisNote],noteDuration);
-          
-              delay(noteDuration);
-              noTone(8);
-            }
-          }
-
  
             void monitor() {
                
@@ -192,7 +177,6 @@ namespace monitoringSystem
                  if (!hasCalledMom ) { 
                    makeVoiceCall();
                    
-                   playTwinkleTwinkleLittleStar();
                    delay(1000);
                    
                    if(!makeSeveralCalls) {
