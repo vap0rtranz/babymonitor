@@ -96,6 +96,12 @@ namespace monitoringSystem
                    Serial.println("The baby is crying! Trying to call mom");
           }
           
+           void playTwinkleTwinkleLittleStar(){
+              tone(piezoSpeakerPin,131,10000);
+              delay(1000);
+              //redundant
+              //noTone(piezoSpeakerPin);
+           }
 
             void monitor() {
                
@@ -120,7 +126,7 @@ namespace monitoringSystem
                  if (!hasCalledMom ) { 
                    makeVoiceCall();
                    
-                   delay(1000);
+                    playTwinkleTwinkleLittleStar();
                    
                    if(!makeSeveralCalls) {
                        hasCalledMom= false;
@@ -153,7 +159,7 @@ void setup()
     
     
     // delay 1 minute to prepare the setup, to not infuluence the sound detector
-     delay(60000);
+    // delay(60000);
 }
 
 void loop()
@@ -161,4 +167,10 @@ void loop()
      //start monitoring 
     _babyMonitor.monitor();
 }
+
+
+
+
+
+ 
 
