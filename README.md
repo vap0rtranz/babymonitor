@@ -1,4 +1,4 @@
-Baby Monitor
+Dog Monitor
 ============
 
 BabyMonitor, is a prototype of a sensor that detects when the baby is crying, and automatically alerts the parents via a phone call, and starts playing lullaby with a simple light touch to soothe the baby. 
