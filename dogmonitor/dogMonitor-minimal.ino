@@ -13,11 +13,27 @@ The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 */
 
-// You can costumize the PINs
-#define fistLed LED_BUILTIN
-#define piezoSpeakerPin 8
-#define soundSensorPin 5
-        
+/********** debug Scaffolding as Variadic macro called "DEBUG" ************/
+#define DEBUG   //If you comment this line, the DPRINT & DPRINTLN lines are defined as blank.
+#ifdef DEBUG    //Macros are usually in all capital letters.
+  #define DPRINT(...)    Serial.print(__VA_ARGS__)     //DPRINT is a macro, debug print
+  #define DPRINTLN(...)  Serial.println(__VA_ARGS__)   //DPRINTLN is a macro, debug print with new line
+#else
+  #define DPRINT(...)    //now defines a blank line
+  #define DPRINTLN(...)  //now defines a blank line
+#endif
+
+// Setup some constants, for the Arduino board pins, etc.
+const byte fistLed = LED_BUILTIN;
+const byte piezoSpeakerPin = 8;
+const byte soundSensorPin = 19; //AO5
+const int samplePeriod = 1000; //1sec samples
+const int sampleBuffer = 3; 
+
+// the analog pins are, respectively: temperature, light, moisture
+// piezoSpeakerPin = 8; soundSensorPin = 5; temperaturePin = 2;
+const byte pin[] = {8, 19, 2};
+int sensor[3];
         
 namespace monitoringSystem 
 {
@@ -25,13 +41,11 @@ namespace monitoringSystem
       protected:
         
         //the volume to detect if the baby is crying or no
-        int isCrying; 
+        int isBarking; 
         //  Sometimes the baby start mumbling or playing, specially at the age when he starts learning how to speak 
-        int isMumbling; 
+        int isNapping; 
         //This is to configure the baby 
         boolean makeSeveralCalls;
-        
-
         
        public: 
         
@@ -39,24 +53,19 @@ namespace monitoringSystem
           // set voice level, isC =True to set the voice level of "isCrying" else to set the voice level of isMumbeling
          {
            if (isC){
-             isCrying= voiceLevel;
+             isBarking= voiceLevel;
            }
            else{
-             isMumbling= voiceLevel;
-           
+             isNapping= voiceLevel;
            }
-            
          }
          
          void configureSystem(boolean severalCalls)
          // This is optional for users who wants to get several calls, or just one
          {
-           
            makeSeveralCalls= severalCalls; 
-         
          }
       
-            
          void initialize()
          // initialize the system 
          {
@@ -66,10 +75,8 @@ namespace monitoringSystem
             Serial.begin(9600);
              
             // Beginning the band manager restarts the modem
-            Serial.println("Starting the service");
-            
+            DPRINTLN("Starting the service");
           } 
-          
           
         void sendSMS(){
           
@@ -77,22 +84,21 @@ namespace monitoringSystem
             char txtMsg[200]= "Yo! The baby is crying. ";
             char charbuffer[20];
           
-            Serial.print("Message to mobile number: ");
-            Serial.println(phoneNumber);
+            DPRINTLN("Message to mobile number: ");
+            DPRINTLN(phoneNumber);
           
             // sms text
-            Serial.println("SENDING");
-            Serial.println();
-            Serial.println("Message:");
-            Serial.println(txtMsg);
-          
-            Serial.println("\nCOMPLETE!\n");  
+            DPRINTLN("SENDING");
+            DPRINTLN();
+            DPRINTLN("Message:");
+            DPRINTLN(txtMsg);
+            DPRINTLN("\nCOMPLETE!\n");  
           }
           
           void makeVoiceCall(){
                   String phoneNumber= "+000000";
                   char charbuffer[20];
-                   Serial.println("The baby is crying! Trying to call mom");
+                  DPRINTLN("The baby is crying! Trying to call mom");
           }
           
            void playTwinkleTwinkleLittleStar(){
@@ -106,21 +112,35 @@ namespace monitoringSystem
                
                 boolean hasCalledMom= false;
                 int noise;
-                  
-                delay(1000); 
-                noise = analogRead(soundSensorPin);
-                Serial.println(noise);
                 
-                if (noise < isMumbling) {
+                //take the analog sensor readings
+                // # of samples to take
+                for (int i = 0; i < sampleBuffer; i++) {
+                     // run through sensors in sequence
+                     for (int j = 0; j < 3; j++) {
+                         sensor[j] = sensor[j] + analogRead(pin[j]);
+                      }
+                  }
+                // smooth out raw sensor readings by simple average of samples
+                for (int j = 0; j < 3; j++) {
+                      sensor[j] = sensor[j] / sampleBuffer;
+                 }
+
+                // record sensor readings
+                
+                 for (int j = 0; j < 3; j++) {
+                    DPRINT(sensor[j]);
+                    DPRINT(",");
+                 }
+                 
+                noise = sensor[0];
+
+                if (noise < isNapping) {
                 digitalWrite(fistLed, LOW);
                 }
-                if (noise > isMumbling && noise < isCrying ) {
-                digitalWrite(fistLed, HIGH);
-                }
               
-                if (noise > isCrying) {
+                if (noise > isBarking) {
                 digitalWrite(fistLed, HIGH);
-              
                 
                  if (!hasCalledMom ) { 
                    makeVoiceCall();
@@ -133,9 +153,7 @@ namespace monitoringSystem
                    }
                   }
                 }
-                
             }
-
           };  
 
 };
@@ -144,15 +162,22 @@ namespace monitoringSystem
 monitoringSystem::babyMonitor _babyMonitor;
 
 void setup()
-{   
-
+{ 
+  // macro setup for debugging
+  pinMode(LED_BUILTIN,OUTPUT); // a bit paranoid redundant 
+  while (!Serial){
+    // if L13 blink light lit, then waiting for serial
+    digitalWrite(LED_BUILTIN, HIGH); 
+  }
+  DPRINTLN("You're connected Arduino console");
+  
     _babyMonitor.initialize() ;
     
-    // set isCrying at 600
-    _babyMonitor.setVoice(300,false);
+    // set isNapping at 500
+    _babyMonitor.setVoice(500,false);
     
-    // set isMumbeling at 300
-    _babyMonitor.setVoice(600,true);
+    // set isBarking at 700
+    _babyMonitor.setVoice(700,true);
     
     // personalize configuration 
     _babyMonitor.configureSystem(true);
@@ -166,6 +191,8 @@ void loop()
 {
      //start monitoring 
     _babyMonitor.monitor();
+    
+    delay(samplePeriod); // loop after sampling delay 
 }
 
 
