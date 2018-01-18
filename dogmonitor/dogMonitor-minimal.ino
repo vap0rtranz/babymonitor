@@ -26,13 +26,16 @@ copies or substantial portions of the Software.
 // Setup some constants, for the Arduino board pins, etc.
 const byte fistLed = LED_BUILTIN;
 const byte piezoSpeakerPin = 8;
-const byte soundSensorPin = 19; //AO5
+const byte soundSensorPin = 14; //AO
+const byte temperaturePin = 15;
 const int samplePeriod = 1000; //1sec samples
 const int sampleBuffer = 3; 
+const int numberSensors = 2;
 
 // the analog pins are, respectively: temperature, light, moisture
-// piezoSpeakerPin = 8; soundSensorPin = 5; temperaturePin = 2;
-const byte pin[] = {8, 19, 2};
+// piezoSpeakerPin = 8; soundSensorPin = 14; temperaturePin = 15;
+const byte pin[] = {14, 15};
+
 int sensor[3];
         
 namespace monitoringSystem 
@@ -117,18 +120,17 @@ namespace monitoringSystem
                 // # of samples to take
                 for (int i = 0; i < sampleBuffer; i++) {
                      // run through sensors in sequence
-                     for (int j = 0; j < 3; j++) {
+                     for (int j = 0; j < numberSensors; j++) {
                          sensor[j] = sensor[j] + analogRead(pin[j]);
                       }
                   }
                 // smooth out raw sensor readings by simple average of samples
-                for (int j = 0; j < 3; j++) {
+                for (int j = 0; j < numberSensors; j++) {
                       sensor[j] = sensor[j] / sampleBuffer;
                  }
 
                 // record sensor readings
-                
-                 for (int j = 0; j < 3; j++) {
+                 for (int j = 0; j < numberSensors; j++) {
                     DPRINT(sensor[j]);
                     DPRINT(",");
                  }
