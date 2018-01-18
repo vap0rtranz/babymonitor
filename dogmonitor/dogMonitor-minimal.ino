@@ -1,5 +1,4 @@
-/*
-MIT License
+T License
 
 Copyright (c) [year] [fullname]
 
@@ -127,6 +126,7 @@ namespace monitoringSystem
                    makeVoiceCall();
                    
                     playTwinkleTwinkleLittleStar();
+                    delay(1000);
                    
                    if(!makeSeveralCalls) {
                        hasCalledMom= false;
